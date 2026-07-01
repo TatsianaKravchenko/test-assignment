@@ -1,0 +1,32 @@
+<div class="container">
+  <h1>Catalog Items</h1>
+
+  <div class="product-grid">
+    @for (product of products; track product.id) {
+      <div class="product-card" (click)="openDetails(product)">
+        <div class="image-wrapper">
+          <img
+            [src]="product?.imageUrl || 'images/no-cover.png'"
+            (error)="setDefaultCover($event)"
+            alt="product preview"
+          />
+        </div>
+
+        <div class="info">
+          <h3>{{ product?.title }}</h3>
+
+          @if (product?.author && product?.author !== 'Unknown Brand') {
+            <p class="brand">{{ product?.author }}</p>
+          } @else {
+            <p class="brand unknown">Brand not specified</p>
+          }
+        </div>
+      </div>
+    } @empty {
+      <div class="loader-container">
+        <mat-spinner mode="indeterminate" diameter="50"></mat-spinner>
+        <p class="loading-text">Loading catalog items...</p>
+      </div>
+    }
+  </div>
+</div>
