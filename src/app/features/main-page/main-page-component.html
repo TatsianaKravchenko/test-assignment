@@ -1,32 +1,41 @@
 <div class="container">
   <h1>Catalog Items</h1>
 
-  <div class="product-grid">
-    @for (product of products; track product.id) {
-      <div class="product-card" (click)="openDetails(product)">
-        <div class="image-wrapper">
-          <img
-            [src]="product?.imageUrl || 'images/no-cover.png'"
-            (error)="setDefaultCover($event)"
-            alt="product preview"
-          />
-        </div>
+  <app-search-input (searchResults)="updateList($event)" (searching)="toggleLoader($event)">
+  </app-search-input>
 
-        <div class="info">
-          <h3>{{ product?.title }}</h3>
+  @if (isLoading()) {
+    <div class="loader-container">
+      <mat-spinner mode="indeterminate" diameter="50"></mat-spinner>
+      <p class="loading-text">Searching the catalog...</p>
+    </div>
+  } @else {
+    <div class="product-grid">
+      @for (product of products(); track product.id) {
+        <div class="product-card" (click)="openDetails(product)">
+          <div class="image-wrapper">
+            <img
+              [src]="product?.imageUrl || 'images/no-cover.png'"
+              (error)="setDefaultCover($event)"
+              alt="product preview"
+            />
+          </div>
 
-          @if (product?.author && product?.author !== 'Unknown Brand') {
-            <p class="brand">{{ product?.author }}</p>
-          } @else {
-            <p class="brand unknown">Brand not specified</p>
-          }
+          <div class="info">
+            <h3>{{ product?.title }}</h3>
+
+            @if (product?.author && product?.author !== 'Unknown Brand') {
+              <p class="brand">{{ product?.author }}</p>
+            } @else {
+              <p class="brand unknown">Brand not specified</p>
+            }
+          </div>
         </div>
-      </div>
-    } @empty {
-      <div class="loader-container">
-        <mat-spinner mode="indeterminate" diameter="50"></mat-spinner>
-        <p class="loading-text">Loading catalog items...</p>
-      </div>
-    }
-  </div>
+      } @empty {
+        <div class="no-results">
+          <p>No products match your search query.</p>
+        </div>
+      }
+    </div>
+  }
 </div>

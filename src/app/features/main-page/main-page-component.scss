@@ -101,3 +101,11 @@
     font-style: italic;
   }
 }
+
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: #757575;
+  font-size: 1.2rem;
+}
