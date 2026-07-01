@@ -1,8 +1,7 @@
 <div class="container">
   <h1>Catalog Items</h1>
 
-  <app-search-input (searchResults)="updateList($event)" (searching)="toggleLoader($event)">
-  </app-search-input>
+  <app-search-input> </app-search-input>
 
   @if (isLoading()) {
     <div class="loader-container">

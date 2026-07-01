@@ -1,4 +1,20 @@
 <mat-form-field class="search-field" appearance="outline">
   <mat-label>Search products...</mat-label>
-  <input matInput [formControl]="searchControl" placeholder="Type to search..." />
+  <input
+    matInput
+    [matAutocomplete]="auto"
+    [formControl]="searchControl"
+    placeholder="Type to search..."
+  />
+  <mat-autocomplete
+    #auto="matAutocomplete"
+    (optionSelected)="onOptionSelected($event.option.value)"
+  >
+    @for (item of filteredHistory(); track item.id) {
+      <mat-option [value]="item.query">
+        <mat-icon class="history-icon" fontIcon="history"></mat-icon>
+        <span>{{ item.query }}</span>
+      </mat-option>
+    }
+  </mat-autocomplete>
 </mat-form-field>

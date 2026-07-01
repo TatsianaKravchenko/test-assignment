@@ -2,3 +2,26 @@
   width: 50%;
   margin-bottom: 24px;
 }
+
+.autocomplete-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .history-icon {
+    color: #5f6368;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .history-text {
+    font-size: 14px;
+    color: #202124;
+  }
+}

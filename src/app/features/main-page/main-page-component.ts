@@ -1,9 +1,14 @@
-import { Component, signal } from '@angular/core';
-import { ApiService } from '../../core/services/api.service';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Product } from '../../core/models/product.model';
 import { SearchInputComponent } from './components/search-input-component/search-input-component';
+import { Store } from '@ngrx/store';
+import {
+  selectAllProducts,
+  selectProductsLoading,
+} from '../../core/store/products/products.selectors';
+import * as ProductsActions from '../../core/store/products/products.actions';
 
 @Component({
   selector: 'app-main-page-component',
@@ -12,29 +17,13 @@ import { SearchInputComponent } from './components/search-input-component/search
   styleUrl: './main-page-component.scss',
 })
 export class MainPageComponent {
-  products = signal<Product[]>([]);
-  isLoading = signal(false);
+  private store = inject(Store);
 
-  constructor(private apiService: ApiService) {}
+  products = this.store.selectSignal(selectAllProducts);
+  isLoading = this.store.selectSignal(selectProductsLoading);
 
   ngOnInit(): void {
-    this.loadInitialData();
-  }
-
-  loadInitialData(): void {
-    this.isLoading.set(true);
-    this.apiService.search('').subscribe((data) => {
-      this.products.set(data);
-      this.isLoading.set(false);
-    });
-  }
-
-  updateList(results: Product[]): void {
-    this.products.set(results);
-  }
-
-  toggleLoader(isSearching: boolean): void {
-    this.isLoading.set(isSearching);
+    this.store.dispatch(ProductsActions.loadProducts());
   }
 
   openDetails(product: Product): void {
