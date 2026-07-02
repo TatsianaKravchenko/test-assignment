@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
@@ -8,6 +8,7 @@ import { Store } from '@ngrx/store';
 import {
   selectAllProducts,
   selectProductsLoading,
+  selectReachedEnd,
 } from '../../core/store/products/products.selectors';
 import * as ProductsActions from '../../core/store/products/products.actions';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -25,13 +26,15 @@ import { ProductDialogComponent } from '../components/product-dialog.component/p
   ],
   templateUrl: './main-page-component.html',
   styleUrl: './main-page-component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MainPageComponent {
+export class MainPageComponent implements OnInit {
   private store = inject(Store);
   private dialog = inject(MatDialog);
 
   products = this.store.selectSignal(selectAllProducts);
   isLoading = this.store.selectSignal(selectProductsLoading);
+  private reachedEnd = this.store.selectSignal(selectReachedEnd);
 
   ngOnInit(): void {
     this.store.dispatch(ProductsActions.loadProducts());
@@ -49,7 +52,12 @@ export class MainPageComponent {
   onScroll(currentIndex: number): void {
     const totalRows = this.productRows().length;
 
-    if (currentIndex >= totalRows - 2 && totalRows > 0 && !this.isLoading()) {
+    if (
+      currentIndex >= totalRows - 2 &&
+      totalRows > 0 &&
+      !this.isLoading() &&
+      !this.reachedEnd()
+    ) {
       this.store.dispatch(ProductsActions.loadMoreProducts());
     }
   }

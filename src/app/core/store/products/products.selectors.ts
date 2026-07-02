@@ -14,3 +14,5 @@ export const selectSearchHistory = createSelector(selectProductsState, selectAll
 export const selectProductsSkip = createSelector(selectProductsState, (state) => state.skip);
 
 export const selectProductsLimit = createSelector(selectProductsState, (state) => state.limit);
+
+export const selectReachedEnd = createSelector(selectProductsState, (state) => state.reachedEnd);
