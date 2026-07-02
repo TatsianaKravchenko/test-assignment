@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/data-processor/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/data-processor/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/data-processor",
+  "projects": {
+    "analytics-service": {
+      "type": "application",
+      "root": "apps/analytics-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/analytics-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/analytics-service/tsconfig.app.json"
+      }
+    },
+    "data-processor": {
+      "type": "application",
+      "root": "apps/data-processor",
+      "entryFile": "main",
+      "sourceRoot": "apps/data-processor/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/data-processor/tsconfig.app.json"
+      }
+    },
+    "shared": {
+      "type": "library",
+      "root": "libs/shared",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared/tsconfig.lib.json"
+      }
+    }
+  }
+}
