@@ -45,3 +45,5 @@ Thumbs.db
 
 .angular/
 .vite/
+
+api_products_*.json

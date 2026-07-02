@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Controller,
+  Get,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -10,10 +11,19 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Multer } from 'multer';
 
-@ApiTags('Data Upload')
+@ApiTags('Data Processor (Service A)')
 @Controller('data')
 export class AppController {
   constructor(private readonly appService: AppService) {}
+
+  @Get('fetch')
+  @ApiOperation({
+    summary:
+      'Automatically fetch products from DummyJSON API, save to local file and Mongo',
+  })
+  async fetchApiData() {
+    return this.appService.fetchAndSaveFromApi();
+  }
 
   @Post('upload')
   @ApiOperation({ summary: 'Upload and parse data file (JSON/CSV)' })
