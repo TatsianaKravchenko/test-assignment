@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog } from '@angular/material/dialog';
 import { Product } from '../../core/models/product.model';
 import { SearchInputComponent } from './components/search-input-component/search-input-component';
 import { Store } from '@ngrx/store';
@@ -10,15 +11,24 @@ import {
 } from '../../core/store/products/products.selectors';
 import * as ProductsActions from '../../core/store/products/products.actions';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { ProductCardComponent } from '../components/product-card.component/product-card.component';
+import { ProductDialogComponent } from '../components/product-dialog.component/product-dialog.component';
 
 @Component({
   selector: 'app-main-page-component',
-  imports: [CommonModule, MatProgressSpinnerModule, SearchInputComponent, ScrollingModule],
+  imports: [
+    CommonModule,
+    MatProgressSpinnerModule,
+    SearchInputComponent,
+    ScrollingModule,
+    ProductCardComponent,
+  ],
   templateUrl: './main-page-component.html',
   styleUrl: './main-page-component.scss',
 })
 export class MainPageComponent {
   private store = inject(Store);
+  private dialog = inject(MatDialog);
 
   products = this.store.selectSignal(selectAllProducts);
   isLoading = this.store.selectSignal(selectProductsLoading);
@@ -28,12 +38,12 @@ export class MainPageComponent {
   }
 
   openDetails(product: Product): void {
-    console.log('product', product);
-  }
-
-  setDefaultCover(event: Event): void {
-    const element = event.target as HTMLImageElement;
-    element.src = 'images/no-cover.png';
+    this.dialog.open(ProductDialogComponent, {
+      data: { product },
+      width: '960px',
+      maxWidth: '95vw',
+      disableClose: true,
+    });
   }
 
   onScroll(currentIndex: number): void {

@@ -15,28 +15,30 @@ export class ApiService {
 
     return this.http
       .get<DummyJSONResponse>(url)
-      .pipe(
-        map((res) =>
-          res.products.map((item: DummyProduct) =>
-            this.mapToProduct(item, `Rating: ${item.rating}`),
-          ),
-        ),
-      );
+      .pipe(map((res) => res.products.map((item: DummyProduct) => this.mapToProduct(item))));
   }
 
   getBookDetails(id: string): Observable<Product> {
     return this.http
       .get<DummyProduct>(`${this.baseUrl}/${id}`)
-      .pipe(map((item: DummyProduct) => this.mapToProduct(item, `Price: $${item.price}`)));
+      .pipe(map((item: DummyProduct) => this.mapToProduct(item)));
   }
 
-  private mapToProduct(item: DummyProduct, dynamicSubject: string): Product {
+  private mapToProduct(item: DummyProduct): Product {
     return {
       id: item.id.toString(),
       title: item.title,
-      author: item.brand || 'Unknown Brand',
+      brand: item.brand || '',
       imageUrl: item.images?.[0] || null,
-      subjects: [item.category, dynamicSubject],
+      subjects: [item.category],
+      price: item.price,
+      description: item.description,
+      category: item.category,
+      rating: item.rating,
+      discountPercentage: item.discountPercentage,
+      stock: item.stock,
+      availabilityStatus: item.availabilityStatus,
+      tags: item.tags,
     };
   }
 }

@@ -1,0 +1,29 @@
+<div class="image-wrapper">
+  <img
+    [src]="product().imageUrl || 'images/no-cover.png'"
+    (error)="setDefaultCover($event)"
+    alt="product preview"
+  />
+</div>
+
+<div class="info">
+  @if (product().category) {
+    <span class="card-category">{{ product().category }}</span>
+  }
+
+  <h3>{{ product().title }}</h3>
+
+  <p class="brand" [class.unknown]="!product().brand">
+    {{ product().brand ? product().brand : '' }}
+  </p>
+
+  <div class="card-footer">
+    @if (product().price) {
+      <span class="card-price">${{ product().price }}</span>
+    }
+
+    @if (product().rating) {
+      <span class="card-rating"> <span class="star">★</span> {{ product().rating }} </span>
+    }
+  </div>
+</div>

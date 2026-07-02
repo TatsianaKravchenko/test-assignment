@@ -1,0 +1,55 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>{{ data.product.title }}</h2>
+  <button mat-icon-button (click)="close()" class="close-button">✕</button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <div class="product-dialog-layout">
+    <div class="canvas-side">
+      <div class="canvas-container">
+        <img
+          [src]="data.product.imageUrl || 'images/no-cover.png'"
+          alt="product detail"
+          class="source-image"
+        />
+      </div>
+    </div>
+
+    <div class="details-side">
+      <div class="meta-item">
+        <span class="label">Brand:</span>
+        <span
+          class="value"
+          [class.unknown]="!data.product.brand || data.product.brand === 'Unknown Brand'"
+        >
+          {{ data.product.brand || '-' }}
+        </span>
+      </div>
+
+      @if (data.product.price) {
+        <div class="price-box">
+          <span class="price-label">Price:</span>
+          <span class="price-value">${{ data.product.price }}</span>
+        </div>
+      }
+
+      @if (data.product.description) {
+        <div class="description-box">
+          <h3>Description</h3>
+          <p class="description-text">{{ data.product.description }}</p>
+        </div>
+      }
+
+      @if (data.product.rating) {
+        <div class="info-row">
+          <span class="info-label">Rating:</span>
+          <span class="info-value">★ {{ data.product.rating }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-raised-button color="primary" (click)="close()">Close</button>
+</mat-dialog-actions>

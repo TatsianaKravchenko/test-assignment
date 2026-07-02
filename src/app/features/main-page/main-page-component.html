@@ -16,25 +16,7 @@
     >
       <div *cdkVirtualFor="let row of productRows(); trackBy: trackRow" class="product-grid-row">
         @for (product of row; track product.id) {
-          <div class="product-card" (click)="openDetails(product)">
-            <div class="image-wrapper">
-              <img
-                [src]="product?.imageUrl || 'images/no-cover.png'"
-                (error)="setDefaultCover($event)"
-                alt="product preview"
-              />
-            </div>
-
-            <div class="info">
-              <h3>{{ product?.title }}</h3>
-
-              @if (product?.author && product?.author !== 'Unknown Brand') {
-                <p class="brand">{{ product?.author }}</p>
-              } @else {
-                <p class="brand unknown">Brand not specified</p>
-              }
-            </div>
-          </div>
+          <app-product-card [product]="product" (click)="openDetails(product)"></app-product-card>
         }
       </div>
 
