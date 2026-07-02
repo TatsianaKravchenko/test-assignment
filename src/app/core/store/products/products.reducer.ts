@@ -16,7 +16,6 @@ export interface ProductsState {
   history: EntityState<SearchQueryEntity>;
   skip: number;
   limit: number;
-  polygons: any[];
 }
 
 export const searchHistoryAdapter: EntityAdapter<SearchQueryEntity> =
@@ -32,7 +31,6 @@ export const initialState: ProductsState = {
   history: searchHistoryAdapter.getInitialState(),
   skip: 0,
   limit: 20,
-  polygons: [],
 };
 
 export const productsReducer = createReducer(

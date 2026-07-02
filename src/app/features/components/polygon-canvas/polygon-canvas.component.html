@@ -1,0 +1,59 @@
+<div class="polygon-editor">
+  <div class="toolbar">
+    <div class="mode-group" role="group" aria-label="Editor mode">
+      <button
+        type="button"
+        class="tool-btn"
+        [class.active]="mode() === 'draw'"
+        (click)="setMode('draw')"
+      >
+        ✏️ Draw
+      </button>
+      <button
+        type="button"
+        class="tool-btn"
+        [class.active]="mode() === 'edit'"
+        (click)="setMode('edit')"
+      >
+        ✥ Move / Rotate
+      </button>
+    </div>
+
+    <div class="swatches" aria-label="Polygon color">
+      @for (swatch of palette; track swatch) {
+        <button
+          type="button"
+          class="swatch"
+          [class.active]="color() === swatch"
+          [style.background]="swatch"
+          [attr.aria-label]="'Color ' + swatch"
+          (click)="pickColor(swatch)"
+        ></button>
+      }
+    </div>
+
+    <div class="actions">
+      <button
+        type="button"
+        class="tool-btn danger"
+        [disabled]="!hasSelection()"
+        (click)="deleteSelected()"
+      >
+        Delete
+      </button>
+      <button type="button" class="tool-btn" [disabled]="shapeCount() === 0" (click)="clearAll()">
+        Clear all
+      </button>
+    </div>
+  </div>
+
+  <div class="canvas-host">
+    <canvas
+      #canvas
+      (pointerdown)="onPointerDown($event)"
+      (pointermove)="onPointerMove($event)"
+      (pointerup)="onPointerUp($event)"
+      (dblclick)="onDoubleClick()"
+    ></canvas>
+  </div>
+</div>

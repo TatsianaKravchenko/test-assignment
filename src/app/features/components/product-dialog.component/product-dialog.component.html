@@ -6,13 +6,10 @@
 <mat-dialog-content class="dialog-content">
   <div class="product-dialog-layout">
     <div class="canvas-side">
-      <div class="canvas-container">
-        <img
-          [src]="data.product.imageUrl || 'images/no-cover.png'"
-          alt="product detail"
-          class="source-image"
-        />
-      </div>
+      <app-polygon-canvas
+        [productId]="data.product.id"
+        [imageUrl]="data.product.imageUrl || 'images/no-cover.png'"
+      ></app-polygon-canvas>
     </div>
 
     <div class="details-side">

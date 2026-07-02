@@ -9,14 +9,16 @@ import { provideEffects } from '@ngrx/effects';
 import { ProductsEffects } from './core/store/products/products.effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { loaderInterceptor } from './core/interceptor/loader.interceptor';
+import { polygonsReducer } from './core/store/polygons/polygons.reducer';
+import { PolygonsEffects } from './core/store/polygons/polygons.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([loaderInterceptor])),
-    provideStore({ products: productsReducer }),
-    provideEffects([ProductsEffects]),
+    provideStore({ products: productsReducer, polygons: polygonsReducer }),
+    provideEffects([ProductsEffects, PolygonsEffects]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
   ],
 };
