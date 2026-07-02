@@ -88,4 +88,47 @@ export class AppService {
       throw new BadRequestException(`Failed to process file: ${errorMessage}`);
     }
   }
+
+  async searchProducts(query: string, page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    const pipeline: any[] = [{ $unwind: '$content' }];
+
+    if (query) {
+      pipeline.push({
+        $match: {
+          $or: [
+            { 'content.title': { $regex: query, $options: 'i' } },
+            { 'content.description': { $regex: query, $options: 'i' } },
+          ],
+        },
+      });
+    }
+
+    pipeline.push(
+      { $project: { _id: 0, product: '$content' } },
+      {
+        $facet: {
+          results: [{ $skip: skip }, { $limit: Number(limit) }],
+          totalCount: [{ $count: 'count' }],
+        },
+      },
+    );
+
+    const [aggregationResult] = await this.parsedDataModel
+      .aggregate(pipeline)
+      .exec();
+
+    const results = aggregationResult?.results.map((r: any) => r.product) || [];
+    const total = aggregationResult?.totalCount[0]?.count || 0;
+
+    return {
+      data: results,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
 }

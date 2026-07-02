@@ -3,11 +3,18 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { AppService } from './app.service';
-import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Multer } from 'multer';
 
@@ -23,6 +30,25 @@ export class AppController {
   })
   async fetchApiData() {
     return this.appService.fetchAndSaveFromApi();
+  }
+
+  @Get('search')
+  @ApiOperation({
+    summary: 'Search API with efficient pagination over stored products',
+  })
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    description: 'Search query for product title or description',
+  })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 10 })
+  async search(
+    @Query('q') q: string = '',
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    return this.appService.searchProducts(q, page, limit);
   }
 
   @Post('upload')
