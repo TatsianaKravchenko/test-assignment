@@ -14,6 +14,8 @@ export interface ProductsState {
   loading: boolean;
   searchValue: string;
   history: EntityState<SearchQueryEntity>;
+  skip: number;
+  limit: number;
   polygons: any[];
 }
 
@@ -28,6 +30,8 @@ export const initialState: ProductsState = {
   loading: false,
   searchValue: '',
   history: searchHistoryAdapter.getInitialState(),
+  skip: 0,
+  limit: 20,
   polygons: [],
 };
 
@@ -42,11 +46,20 @@ export const productsReducer = createReducer(
   on(ProductsActions.setSearchValue, (state, { searchValue }) => ({
     ...state,
     searchValue,
+    products: [],
+    skip: 0,
   })),
 
   on(ProductsActions.loadProductsSuccess, (state, { products }) => ({
     ...state,
     products,
+    skip: state.limit,
+  })),
+
+  on(ProductsActions.loadMoreProductsSuccess, (state, { products }) => ({
+    ...state,
+    products: [...state.products, ...products],
+    skip: state.skip + state.limit,
   })),
 
   on(ProductsActions.saveSearchQuery, (state, { query }) => {

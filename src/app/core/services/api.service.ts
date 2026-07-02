@@ -10,8 +10,8 @@ export class ApiService {
   private baseUrl = 'https://dummyjson.com/products';
   constructor(private http: HttpClient) {}
 
-  search(query: string = ''): Observable<Product[]> {
-    const url = `${this.baseUrl}/search?q=${encodeURIComponent(query)}`;
+  search(query: string = '', limit: number = 20, skip: number = 0): Observable<Product[]> {
+    const url = `${this.baseUrl}/search?q=${encodeURIComponent(query)}&limit=${limit}&skip=${skip}`;
 
     return this.http
       .get<DummyJSONResponse>(url)

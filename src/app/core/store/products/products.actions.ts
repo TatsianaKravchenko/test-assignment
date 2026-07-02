@@ -24,3 +24,10 @@ export const saveSearchQuery = createAction(
   '[Products] Save Search Query',
   props<{ query: string }>(),
 );
+
+export const loadMoreProducts = createAction('[Products] Load More Products');
+
+export const loadMoreProductsSuccess = createAction(
+  '[Products] Load More Products Success',
+  props<{ products: Product[] }>(),
+);

@@ -3,38 +3,52 @@
 
   <app-search-input> </app-search-input>
 
-  @if (isLoading()) {
+  @if (isLoading() && products().length === 0) {
     <div class="loader-container">
       <mat-spinner mode="indeterminate" diameter="50"></mat-spinner>
       <p class="loading-text">Searching the catalog...</p>
     </div>
   } @else {
-    <div class="product-grid">
-      @for (product of products(); track product.id) {
-        <div class="product-card" (click)="openDetails(product)">
-          <div class="image-wrapper">
-            <img
-              [src]="product?.imageUrl || 'images/no-cover.png'"
-              (error)="setDefaultCover($event)"
-              alt="product preview"
-            />
-          </div>
+    <cdk-virtual-scroll-viewport
+      itemSize="384"
+      class="products-viewport"
+      (scrolledIndexChange)="onScroll($event)"
+    >
+      <div *cdkVirtualFor="let row of productRows(); trackBy: trackRow" class="product-grid-row">
+        @for (product of row; track product.id) {
+          <div class="product-card" (click)="openDetails(product)">
+            <div class="image-wrapper">
+              <img
+                [src]="product?.imageUrl || 'images/no-cover.png'"
+                (error)="setDefaultCover($event)"
+                alt="product preview"
+              />
+            </div>
 
-          <div class="info">
-            <h3>{{ product?.title }}</h3>
+            <div class="info">
+              <h3>{{ product?.title }}</h3>
 
-            @if (product?.author && product?.author !== 'Unknown Brand') {
-              <p class="brand">{{ product?.author }}</p>
-            } @else {
-              <p class="brand unknown">Brand not specified</p>
-            }
+              @if (product?.author && product?.author !== 'Unknown Brand') {
+                <p class="brand">{{ product?.author }}</p>
+              } @else {
+                <p class="brand unknown">Brand not specified</p>
+              }
+            </div>
           </div>
-        </div>
-      } @empty {
+        }
+      </div>
+
+      @if (products().length === 0) {
         <div class="no-results">
           <p>No products match your search query.</p>
         </div>
       }
-    </div>
+
+      @if (isLoading() && products().length > 0) {
+        <div class="bottom-loader">
+          <mat-spinner diameter="30"></mat-spinner>
+        </div>
+      }
+    </cdk-virtual-scroll-viewport>
   }
 </div>

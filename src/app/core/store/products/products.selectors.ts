@@ -10,3 +10,7 @@ export const selectProductsLoading = createSelector(selectProductsState, (state)
 export const selectSearchValue = createSelector(selectProductsState, (state) => state.searchValue);
 
 export const selectSearchHistory = createSelector(selectProductsState, selectAllQueries);
+
+export const selectProductsSkip = createSelector(selectProductsState, (state) => state.skip);
+
+export const selectProductsLimit = createSelector(selectProductsState, (state) => state.limit);
