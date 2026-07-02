@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, shareReplay, throwError } from 'rxjs';
 import { DummyJSONResponse, DummyProduct, Product } from '../models/product.model';
 
 @Injectable({
@@ -8,14 +8,34 @@ import { DummyJSONResponse, DummyProduct, Product } from '../models/product.mode
 })
 export class ApiService {
   private baseUrl = 'https://dummyjson.com/products';
+
+  private readonly cache = new Map<string, Observable<Product[]>>();
+
   constructor(private http: HttpClient) {}
 
   search(query: string = '', limit: number = 20, skip: number = 0): Observable<Product[]> {
-    const url = `${this.baseUrl}/search?q=${encodeURIComponent(query)}&limit=${limit}&skip=${skip}`;
+    const key = `${query.trim().toLowerCase()}_${limit}_${skip}`;
+    const cached = this.cache.get(key);
+    if (cached) {
+      return cached;
+    }
 
-    return this.http
-      .get<DummyJSONResponse>(url)
-      .pipe(map((res) => res.products.map((item: DummyProduct) => this.mapToProduct(item))));
+    const url = `${this.baseUrl}/search?q=${encodeURIComponent(query)}&limit=${limit}&skip=${skip}`;
+    const request$ = this.http.get<DummyJSONResponse>(url).pipe(
+      map((res) => res.products.map((item: DummyProduct) => this.mapToProduct(item))),
+      shareReplay({ bufferSize: 1, refCount: false }),
+      catchError((error) => {
+        this.cache.delete(key);
+        return throwError(() => error);
+      }),
+    );
+
+    this.cache.set(key, request$);
+    return request$;
+  }
+
+  clearCache(): void {
+    this.cache.clear();
   }
 
   getBookDetails(id: string): Observable<Product> {
