@@ -1,6 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Res } from '@nestjs/common';
 import { AnalyticsServiceService } from './analytics-service.service';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { type Response } from 'express';
 
 @ApiTags('Analytics')
 @Controller('analytics')
@@ -33,5 +34,21 @@ export class AnalyticsServiceController {
     @Query('endDate') endDate?: string,
   ) {
     return this.analyticsServiceService.getLogs(action, startDate, endDate);
+  }
+
+  @Get('report')
+  @ApiOperation({
+    summary: 'Generate PDF Report with charts from RedisTimeSeries metrics',
+  })
+  async getPdfReport(@Res() res: Response) {
+    const pdfBuffer = await this.analyticsServiceService.generatePdfReport();
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename=analytics_report.pdf',
+      'Content-Length': pdfBuffer.length,
+    });
+
+    res.end(pdfBuffer);
   }
 }
