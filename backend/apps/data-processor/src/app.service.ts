@@ -21,6 +21,20 @@ export class AppService {
     private readonly redisTimeSeriesService: RedisTimeSeriesService,
   ) {}
 
+  async onApplicationBootstrap() {
+    try {
+      const count = await this.parsedDataModel.countDocuments().exec();
+      if (count === 0) {
+        await this.fetchAndSaveFromApi();
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(
+        `[DataProcessor] Initial data seeding on bootstrap failed: ${message}`,
+      );
+    }
+  }
+
   async fetchAndSaveFromApi() {
     try {
       const response = await firstValueFrom(

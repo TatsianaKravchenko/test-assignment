@@ -6,7 +6,9 @@ import { createClient } from 'redis';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/data_processor_db'),
+    MongooseModule.forRoot(
+      `mongodb://${process.env.MONGO_HOST || 'localhost'}:27017/nest`,
+    ),
     MongooseModule.forFeature([
       { name: ParsedData.name, schema: ParsedDataSchema },
     ]),
@@ -16,8 +18,9 @@ import { createClient } from 'redis';
     {
       provide: 'REDIS_CLIENT',
       useFactory: async () => {
+        const redisHost = process.env.REDIS_HOST || 'localhost';
         const client = createClient({
-          url: 'redis://localhost:6379',
+          url: `redis://${redisHost}:6379`,
         });
         await client.connect();
         return client;

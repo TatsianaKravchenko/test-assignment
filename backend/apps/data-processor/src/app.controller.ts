@@ -37,12 +37,12 @@ export class AppController {
     summary: 'Search API with efficient pagination over stored products',
   })
   @ApiQuery({
-    name: 'q',
+    name: 'query',
     required: false,
     description: 'Search query for product title or description',
   })
-  @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 10 })
+  @ApiQuery({ name: 'skip', required: false, example: 0 })
   async search(
     @Query('query') query?: string,
     @Query('limit') limit?: number,
