@@ -3,11 +3,7 @@ import { Document } from 'mongoose';
 
 export type ParsedDataDocument = ParsedData & Document;
 
-@Schema({
-  timestamps: true,
-  toJSON: { getters: true, virtuals: true },
-  toObject: { getters: true, virtuals: true },
-})
+@Schema({ timestamps: true })
 export class ParsedData {
   @Prop({ required: true })
   fileName!: string;
@@ -15,15 +11,11 @@ export class ParsedData {
   @Prop({ required: true })
   fileType!: string;
 
-  @Prop({ type: Object, required: true })
-  content!: Record<string, any>[];
+  @Prop({ default: 0 })
+  recordCount!: number;
 
   @Prop({ default: 'processed' })
   status!: string;
 }
 
 export const ParsedDataSchema = SchemaFactory.createForClass(ParsedData);
-ParsedDataSchema.index({
-  'content.title': 'text',
-  'content.description': 'text',
-});

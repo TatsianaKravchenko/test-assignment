@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { SharedService } from './shared.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ParsedData, ParsedDataSchema } from './schemas/parsed-data.schema';
+import { Product, ProductSchema } from './schemas/product.schema';
 import { createClient } from 'redis';
 
 @Module({
@@ -11,6 +12,7 @@ import { createClient } from 'redis';
     ),
     MongooseModule.forFeature([
       { name: ParsedData.name, schema: ParsedDataSchema },
+      { name: Product.name, schema: ProductSchema },
     ]),
   ],
   providers: [
