@@ -8,17 +8,37 @@ export class RedisTimeSeriesService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    const actions = ['action:fetch', 'action:upload', 'action:search'];
+    const actions: ('fetch' | 'upload' | 'search')[] = [
+      'fetch',
+      'upload',
+      'search',
+    ];
 
     for (const action of actions) {
+      const key = `action:${action}`;
+
       try {
         await this.redisClient.sendCommand([
           'TS.CREATE',
-          action,
-          'DUPLICATION_POLICY',
-          'FIRST',
+          key,
+          'RETENTION',
+          '0',
         ]);
-      } catch (e) {}
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          if (!error.message.includes('key already exists')) {
+            console.error(
+              `[RedisTimeSeries] Failed to initialize time-series key "${key}":`,
+              error.message,
+            );
+          }
+        } else {
+          console.error(
+            `[RedisTimeSeries] Unknown error during initialization of "${key}":`,
+            error,
+          );
+        }
+      }
     }
   }
 
