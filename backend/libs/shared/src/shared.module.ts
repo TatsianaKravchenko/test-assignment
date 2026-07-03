@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { SharedService } from './shared.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ParsedData, ParsedDataSchema } from './schemas/parsed-data.schema';
+import { createClient } from 'redis';
 
 @Module({
   imports: [
@@ -10,7 +11,19 @@ import { ParsedData, ParsedDataSchema } from './schemas/parsed-data.schema';
       { name: ParsedData.name, schema: ParsedDataSchema },
     ]),
   ],
-  providers: [SharedService],
-  exports: [SharedService, MongooseModule],
+  providers: [
+    SharedService,
+    {
+      provide: 'REDIS_CLIENT',
+      useFactory: async () => {
+        const client = createClient({
+          url: 'redis://localhost:6379',
+        });
+        await client.connect();
+        return client;
+      },
+    },
+  ],
+  exports: [SharedService, MongooseModule, 'REDIS_CLIENT'],
 })
 export class SharedModule {}

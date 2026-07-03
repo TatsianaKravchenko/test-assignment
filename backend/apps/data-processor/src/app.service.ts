@@ -10,6 +10,7 @@ import { Model } from 'mongoose';
 import { firstValueFrom } from 'rxjs';
 import * as fs from 'fs';
 import * as path from 'path';
+import { RedisTimeSeriesService } from './redis-time-series.service';
 
 @Injectable()
 export class AppService {
@@ -17,6 +18,7 @@ export class AppService {
     @InjectModel(ParsedData.name)
     private parsedDataModel: Model<ParsedDataDocument>,
     private readonly httpService: HttpService,
+    private readonly redisTimeSeriesService: RedisTimeSeriesService,
   ) {}
 
   async fetchAndSaveFromApi() {
@@ -37,6 +39,8 @@ export class AppService {
         status: 'pending',
       });
       const savedRecord = await newRecord.save();
+
+      await this.redisTimeSeriesService.logAction('fetch');
 
       return {
         message:
@@ -76,6 +80,8 @@ export class AppService {
       });
 
       const savedRecord = await newRecord.save();
+
+      await this.redisTimeSeriesService.logAction('upload');
 
       return {
         message: 'File uploaded and processed successfully',
@@ -120,6 +126,8 @@ export class AppService {
 
     const results = aggregationResult?.results.map((r: any) => r.product) || [];
     const total = aggregationResult?.totalCount[0]?.count || 0;
+
+    await this.redisTimeSeriesService.logAction('search');
 
     return {
       data: results,
