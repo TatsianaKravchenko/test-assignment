@@ -56,11 +56,9 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=analytics_db
       - REDIS_HOST=redis
-      - MONGO_HOST=mongodb
     depends_on:
       - postgres
       - redis
-      - mongodb
 
 volumes:
   mongo_data:

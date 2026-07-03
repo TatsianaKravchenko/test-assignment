@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { SharedModule } from '@app/shared/shared.module';
+import { MongoModule, RedisModule } from '@app/shared';
 import { HttpModule } from '@nestjs/axios';
 import { RedisTimeSeriesService } from './redis-time-series.service';
 
 @Module({
-  imports: [SharedModule, HttpModule],
+  imports: [MongoModule, RedisModule, HttpModule],
   controllers: [AppController],
   providers: [AppService, RedisTimeSeriesService],
 })

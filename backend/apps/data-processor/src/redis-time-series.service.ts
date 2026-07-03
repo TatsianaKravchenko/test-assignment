@@ -1,10 +1,11 @@
 import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { REDIS_CLIENT } from '@app/shared';
 import { type RedisClientType } from 'redis';
 
 @Injectable()
 export class RedisTimeSeriesService implements OnModuleInit {
   constructor(
-    @Inject('REDIS_CLIENT') private readonly redisClient: RedisClientType,
+    @Inject(REDIS_CLIENT) private readonly redisClient: RedisClientType,
   ) {}
 
   async onModuleInit() {

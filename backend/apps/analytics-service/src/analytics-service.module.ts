@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AnalyticsServiceController } from './analytics-service.controller';
 import { AnalyticsServiceService } from './analytics-service.service';
-import { SharedModule } from '@app/shared/shared.module';
+import { RedisModule } from '@app/shared';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ApiLog } from './entities/log.entity';
 
 @Module({
   imports: [
-    SharedModule,
+    RedisModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.POSTGRES_HOST || 'localhost',

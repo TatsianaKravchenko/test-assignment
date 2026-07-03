@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { REDIS_CLIENT } from '@app/shared';
 import { type RedisClientType } from 'redis';
 import { ApiLog } from './entities/log.entity';
 import { Repository } from 'typeorm';
@@ -12,7 +13,7 @@ export class AnalyticsServiceService {
   constructor(
     @InjectRepository(ApiLog)
     private readonly logRepository: Repository<ApiLog>,
-    @Inject('REDIS_CLIENT')
+    @Inject(REDIS_CLIENT)
     private readonly redisClient: RedisClientType,
   ) {}
 
