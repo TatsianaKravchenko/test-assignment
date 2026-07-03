@@ -9,6 +9,8 @@ gRPC, and Swagger docs.
 
 ## Demo
 
+https://github.com/user-attachments/assets/c8e70491-eb2d-4e82-bccd-389eff2c3750
+
 ---
 
 ## Architecture
