@@ -95,17 +95,17 @@ export class AppService {
     }
   }
 
-  async searchProducts(query: string, page: number = 1, limit: number = 10) {
-    const skip = (page - 1) * limit;
-    const pipeline: any[] = [{ $unwind: '$content' }];
+  async searchProducts(query: string, limit: number = 10, skip: number = 0) {
+    const parsedLimit = Number(limit) || 10;
+    const parsedSkip = Number(skip) || 0;
+    const pipeline: any[] = [];
 
-    if (query) {
+    pipeline.push({ $unwind: '$content' });
+
+    if (query && query.trim().length > 0) {
       pipeline.push({
         $match: {
-          $or: [
-            { 'content.title': { $regex: query, $options: 'i' } },
-            { 'content.description': { $regex: query, $options: 'i' } },
-          ],
+          'content.title': { $regex: query, $options: 'i' },
         },
       });
     }
@@ -114,28 +114,32 @@ export class AppService {
       { $project: { _id: 0, product: '$content' } },
       {
         $facet: {
-          results: [{ $skip: skip }, { $limit: Number(limit) }],
+          results: [{ $skip: parsedSkip }, { $limit: Number(parsedLimit) }],
           totalCount: [{ $count: 'count' }],
         },
       },
     );
 
-    const [aggregationResult] = await this.parsedDataModel
-      .aggregate(pipeline)
-      .exec();
+    const resultsFromDb = await this.parsedDataModel.aggregate(pipeline).exec();
 
-    const results = aggregationResult?.results.map((r: any) => r.product) || [];
-    const total = aggregationResult?.totalCount[0]?.count || 0;
+    const aggregationResult = resultsFromDb && resultsFromDb[0];
 
-    await this.redisTimeSeriesService.logAction('search');
+    const results = aggregationResult?.results
+      ? aggregationResult.results.map((r: any) => r.product).filter(Boolean)
+      : [];
+
+    const total = aggregationResult?.totalCount?.[0]?.count || 0;
+
+    if (query && query.trim().length > 0) {
+      await this.redisTimeSeriesService.logAction('search');
+    }
 
     return {
       data: results,
       meta: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        skip: parsedSkip,
+        limit: parsedLimit,
       },
     };
   }

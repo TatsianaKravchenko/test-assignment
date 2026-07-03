@@ -3,11 +3,20 @@ import { Injectable } from '@angular/core';
 import { catchError, map, Observable, shareReplay, throwError } from 'rxjs';
 import { DummyJSONResponse, DummyProduct, Product } from '../models/product.model';
 
+interface SearchResponse {
+  data: DummyProduct[];
+  meta: {
+    total: number;
+    limit: number;
+    skip: number;
+  };
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  private baseUrl = 'https://dummyjson.com/products';
+  private baseUrl = 'http://localhost:3000/data';
 
   private readonly cache = new Map<string, Observable<Product[]>>();
 
@@ -20,9 +29,9 @@ export class ApiService {
       return cached;
     }
 
-    const url = `${this.baseUrl}/search?q=${encodeURIComponent(query)}&limit=${limit}&skip=${skip}`;
-    const request$ = this.http.get<DummyJSONResponse>(url).pipe(
-      map((res) => res.products.map((item: DummyProduct) => this.mapToProduct(item))),
+    const url = `${this.baseUrl}/search?query=${encodeURIComponent(query)}&limit=${limit}&skip=${skip}`;
+    const request$ = this.http.get<SearchResponse>(url).pipe(
+      map((res) => res.data.map((item: DummyProduct) => this.mapToProduct(item))),
       shareReplay({ bufferSize: 1, refCount: false }),
       catchError((error) => {
         this.cache.delete(key);
@@ -36,12 +45,6 @@ export class ApiService {
 
   clearCache(): void {
     this.cache.clear();
-  }
-
-  getBookDetails(id: string): Observable<Product> {
-    return this.http
-      .get<DummyProduct>(`${this.baseUrl}/${id}`)
-      .pipe(map((item: DummyProduct) => this.mapToProduct(item)));
   }
 
   private mapToProduct(item: DummyProduct): Product {

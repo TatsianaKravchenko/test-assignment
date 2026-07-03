@@ -44,11 +44,11 @@ export class AppController {
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 10 })
   async search(
-    @Query('q') q: string = '',
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
+    @Query('query') query?: string,
+    @Query('limit') limit?: number,
+    @Query('skip') skip?: number,
   ) {
-    return this.appService.searchProducts(q, page, limit);
+    return this.appService.searchProducts(query ?? '', limit, skip);
   }
 
   @Post('upload')
