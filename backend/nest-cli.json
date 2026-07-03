@@ -16,7 +16,9 @@
       "entryFile": "main",
       "sourceRoot": "apps/analytics-service/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/analytics-service/tsconfig.app.json"
+        "tsConfigPath": "apps/analytics-service/tsconfig.app.json",
+        "assets": [{ "include": "**/*.proto", "outDir": "dist/apps/analytics-service" }],
+        "watchAssets": true
       }
     },
     "data-processor": {

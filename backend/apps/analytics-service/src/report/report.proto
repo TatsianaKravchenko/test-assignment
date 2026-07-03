@@ -1,0 +1,23 @@
+// NOTE: keep in sync with the canonical contract at report-service/proto/report.proto
+syntax = "proto3";
+
+package report;
+
+// Generates the analytics PDF report from RedisTimeSeries metrics.
+service ReportService {
+  rpc GenerateReport (ReportRequest) returns (ReportReply);
+}
+
+message ReportRequest {
+  // Optional time window (unix ms). When both are 0 the server defaults to the
+  // last 24 hours.
+  int64 from_ts = 1;
+  int64 to_ts = 2;
+}
+
+message ReportReply {
+  // The rendered PDF document.
+  bytes pdf = 1;
+  // Suggested download filename.
+  string filename = 2;
+}

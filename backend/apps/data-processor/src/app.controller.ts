@@ -1,22 +1,6 @@
-import {
-  BadRequestException,
-  Controller,
-  Get,
-  Post,
-  Query,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { AppService } from './app.service';
-import {
-  ApiBody,
-  ApiConsumes,
-  ApiOperation,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { Multer } from 'multer';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Data Processor (Service A)')
 @Controller('data')
@@ -26,7 +10,7 @@ export class AppController {
   @Get('fetch')
   @ApiOperation({
     summary:
-      'Automatically fetch products from DummyJSON API, save to local file and Mongo',
+      'Fetch products from the public API, save to a JSON file, parse it and insert into MongoDB',
   })
   async fetchApiData() {
     return this.appService.fetchAndSaveFromApi();
@@ -49,28 +33,5 @@ export class AppController {
     @Query('skip') skip?: number,
   ) {
     return this.appService.searchProducts(query ?? '', limit, skip);
-  }
-
-  @Post('upload')
-  @ApiOperation({ summary: 'Upload and parse data file (JSON/CSV)' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    if (!file) {
-      throw new BadRequestException('File is required');
-    }
-
-    return this.appService.processUploadedFile(file);
   }
 }

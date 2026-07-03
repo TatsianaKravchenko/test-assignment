@@ -1,16 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 describe('AppController', () => {
   let appController: AppController;
-  let appService: jest.Mocked<Pick<AppService, 'searchProducts' | 'processUploadedFile'>>;
+  let appService: jest.Mocked<Pick<AppService, 'searchProducts' | 'fetchAndSaveFromApi'>>;
 
   beforeEach(async () => {
     appService = {
       searchProducts: jest.fn(),
-      processUploadedFile: jest.fn(),
+      fetchAndSaveFromApi: jest.fn(),
     };
 
     const app: TestingModule = await Test.createTestingModule({
@@ -23,6 +22,16 @@ describe('AppController', () => {
 
   it('should be defined', () => {
     expect(appController).toBeDefined();
+  });
+
+  describe('fetch', () => {
+    it('delegates to the fetch-and-ingest pipeline', async () => {
+      const result = { message: 'ok', file: 'f.json', totalItemsInserted: 100 };
+      appService.fetchAndSaveFromApi.mockResolvedValue(result as never);
+
+      await expect(appController.fetchApiData()).resolves.toBe(result);
+      expect(appService.fetchAndSaveFromApi).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('search', () => {
@@ -42,15 +51,6 @@ describe('AppController', () => {
       await appController.search(undefined, undefined, undefined);
 
       expect(appService.searchProducts).toHaveBeenCalledWith('', undefined, undefined);
-    });
-  });
-
-  describe('uploadFile', () => {
-    it('throws BadRequestException when no file is provided', async () => {
-      await expect(
-        appController.uploadFile(undefined as unknown as Express.Multer.File),
-      ).rejects.toBeInstanceOf(BadRequestException);
-      expect(appService.processUploadedFile).not.toHaveBeenCalled();
     });
   });
 });

@@ -17,7 +17,7 @@ RUN npm ci --omit=dev --legacy-peer-deps
 
 COPY --from=builder /usr/src/app/dist ./dist
 
-RUN apk add --no-cache ttf-dejavu
+COPY --from=builder /usr/src/app/apps/analytics-service/src/report/report.proto ./dist/apps/analytics-service/report/report.proto
 
 EXPOSE 3001
 

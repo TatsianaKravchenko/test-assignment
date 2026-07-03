@@ -56,8 +56,24 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=analytics_db
       - REDIS_HOST=redis
+      - REPORT_GRPC_URL=report-service:50051
     depends_on:
       - postgres
+      - redis
+      - report-service
+
+  report-service:
+    build:
+      context: ./report-service
+      dockerfile: Dockerfile
+    container_name: nest_report_service
+    ports:
+      - '50051:50051'
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - GRPC_PORT=50051
+    depends_on:
       - redis
 
 volumes:

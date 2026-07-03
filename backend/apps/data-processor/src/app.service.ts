@@ -6,9 +6,9 @@ import {
 } from '@app/shared';
 import { HttpService } from '@nestjs/axios';
 import {
-  BadRequestException,
   Injectable,
   InternalServerErrorException,
+  OnApplicationBootstrap,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AnyBulkWriteOperation } from 'mongodb';
@@ -20,8 +20,10 @@ import { RedisTimeSeriesService } from './redis-time-series.service';
 
 type RawProduct = Record<string, any>;
 
+const PUBLIC_API_URL = 'https://dummyjson.com/products?limit=100';
+
 @Injectable()
-export class AppService {
+export class AppService implements OnApplicationBootstrap {
   constructor(
     @InjectModel(ParsedData.name)
     private parsedDataModel: Model<ParsedDataDocument>,
@@ -31,7 +33,7 @@ export class AppService {
     private readonly redisTimeSeriesService: RedisTimeSeriesService,
   ) {}
 
-  async onApplicationBootstrap() {
+  async onApplicationBootstrap(): Promise<void> {
     try {
       const count = await this.productModel.estimatedDocumentCount().exec();
       if (count === 0) {
@@ -40,7 +42,7 @@ export class AppService {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error(
-        `[DataProcessor] Initial data seeding on bootstrap failed: ${message}`,
+        `[DataProcessor] Initial data load on bootstrap failed: ${message}`,
       );
     }
   }
@@ -48,9 +50,8 @@ export class AppService {
   async fetchAndSaveFromApi() {
     try {
       const response = await firstValueFrom(
-        this.httpService.get('https://dummyjson.com/products?limit=100'),
+        this.httpService.get(PUBLIC_API_URL),
       );
-      const products: RawProduct[] = response.data?.products ?? [];
 
       const fileName = `api_products_${Date.now()}.json`;
       const filePath = path.join(__dirname, '..', '..', '..', fileName);
@@ -60,13 +61,16 @@ export class AppService {
         'utf-8',
       );
 
+      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      const products = this.parseProductsFile(fileContent);
       const inserted = await this.upsertProducts(products);
+
       await this.logIngestion(fileName, 'json', inserted);
       await this.redisTimeSeriesService.logAction('fetch');
 
       return {
         message:
-          'Data fetched from DummyJSON, saved to file and inserted one-per-document into Mongo',
+          'Data fetched from the public API, saved to file and inserted into MongoDB',
         file: fileName,
         totalItemsInserted: inserted,
       };
@@ -75,44 +79,6 @@ export class AppService {
       throw new InternalServerErrorException(
         `Failed to fetch and process API data: ${message}`,
       );
-    }
-  }
-
-  async processUploadedFile(file: Express.Multer.File) {
-    const fileName = file.originalname;
-    const fileExtension = fileName.split('.').pop()?.toLowerCase();
-
-    try {
-      let products: RawProduct[];
-      if (fileExtension === 'json') {
-        products = this.extractProducts(
-          JSON.parse(file.buffer.toString('utf-8')),
-        );
-      } else if (fileExtension === 'csv') {
-        products = this.parseCsv(file.buffer.toString('utf-8'));
-      } else {
-        throw new BadRequestException(
-          'Unsupported file type. Only JSON/CSV are allowed.',
-        );
-      }
-
-      if (products.length === 0) {
-        throw new BadRequestException('No records found in the uploaded file.');
-      }
-
-      const inserted = await this.upsertProducts(products);
-      await this.logIngestion(fileName, fileExtension ?? 'unknown', inserted);
-      await this.redisTimeSeriesService.logAction('upload');
-
-      return {
-        message: 'File uploaded and processed successfully',
-        fileName,
-        totalItemsInserted: inserted,
-      };
-    } catch (error) {
-      if (error instanceof BadRequestException) throw error;
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      throw new BadRequestException(`Failed to process file: ${message}`);
     }
   }
 
@@ -154,6 +120,16 @@ export class AppService {
     };
   }
 
+  private parseProductsFile(raw: string): RawProduct[] {
+    const payload = JSON.parse(raw);
+    if (Array.isArray(payload)) return payload as RawProduct[];
+    if (payload && typeof payload === 'object') {
+      const products = (payload as RawProduct).products;
+      if (Array.isArray(products)) return products as RawProduct[];
+    }
+    return [];
+  }
+
   private async upsertProducts(products: RawProduct[]): Promise<number> {
     const withTitle = products.filter((p) => p && typeof p.title === 'string');
     if (withTitle.length === 0) return 0;
@@ -184,34 +160,6 @@ export class AppService {
       fileType,
       recordCount,
       status: 'processed',
-    });
-  }
-
-  private extractProducts(payload: unknown): RawProduct[] {
-    if (Array.isArray(payload)) return payload as RawProduct[];
-    if (payload && typeof payload === 'object') {
-      const products = (payload as RawProduct).products;
-      if (Array.isArray(products)) return products as RawProduct[];
-      return [payload as RawProduct];
-    }
-    return [];
-  }
-
-  private parseCsv(raw: string): RawProduct[] {
-    const lines = raw
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0);
-    if (lines.length < 2) return [];
-
-    const headers = lines[0].split(',').map((h) => h.trim());
-    return lines.slice(1).map((line) => {
-      const cells = line.split(',');
-      const record: RawProduct = {};
-      headers.forEach((header, index) => {
-        record[header] = cells[index]?.trim() ?? '';
-      });
-      return record;
     });
   }
 }
