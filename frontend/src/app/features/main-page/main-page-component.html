@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container" #gridContainer>
   <h1>Catalog Items</h1>
 
   <app-search-input> </app-search-input>
@@ -14,7 +14,11 @@
       class="products-viewport"
       (scrolledIndexChange)="onScroll($event)"
     >
-      <div *cdkVirtualFor="let row of productRows(); trackBy: trackRow" class="product-grid-row">
+      <div
+        *cdkVirtualFor="let row of productRows(); trackBy: trackRow"
+        class="product-grid-row"
+        [style.grid-template-columns]="gridTemplate()"
+      >
         @for (product of row; track product.id) {
           <app-product-card [product]="product" (click)="openDetails(product)"></app-product-card>
         }
