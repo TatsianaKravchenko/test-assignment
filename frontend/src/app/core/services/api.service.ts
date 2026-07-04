@@ -1,10 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, map, Observable, shareReplay, throwError } from 'rxjs';
-import { DummyJSONResponse, DummyProduct, Product } from '../models/product.model';
+import { Product, ProductDto } from '../models/product.model';
 
 interface SearchResponse {
-  data: DummyProduct[];
+  data: ProductDto[];
   meta: {
     total: number;
     limit: number;
@@ -31,7 +31,7 @@ export class ApiService {
 
     const url = `${this.baseUrl}/search?query=${encodeURIComponent(query)}&limit=${limit}&skip=${skip}`;
     const request$ = this.http.get<SearchResponse>(url).pipe(
-      map((res) => res.data.map((item: DummyProduct) => this.mapToProduct(item))),
+      map((res) => res.data.map((item: ProductDto) => this.mapToProduct(item))),
       shareReplay({ bufferSize: 1, refCount: false }),
       catchError((error) => {
         this.cache.delete(key);
@@ -47,7 +47,7 @@ export class ApiService {
     this.cache.clear();
   }
 
-  private mapToProduct(item: DummyProduct): Product {
+  private mapToProduct(item: ProductDto): Product {
     return {
       id: item.id.toString(),
       title: item.title,

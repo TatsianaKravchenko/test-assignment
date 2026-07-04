@@ -15,7 +15,7 @@ export interface Product {
   tags?: string[];
 }
 
-export interface DummyProduct {
+export interface ProductDto {
   id: number;
   title: string;
   brand?: string;
@@ -28,11 +28,4 @@ export interface DummyProduct {
   stock: number;
   availabilityStatus: string;
   tags: string[];
-}
-
-export interface DummyJSONResponse {
-  products: DummyProduct[];
-  total: number;
-  skip: number;
-  limit: number;
 }

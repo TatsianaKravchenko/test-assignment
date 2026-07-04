@@ -17,13 +17,13 @@ export class ProductsEffects {
     this.actions$.pipe(
       ofType(ProductsActions.loadProducts, ProductsActions.setSearchValue),
       tap((action) => {
-        if (action.type === '[Products] Set Search Value') {
+        if (action.type === ProductsActions.setSearchValue.type) {
           this.apiService.clearCache();
         }
       }),
       switchMap((action) => {
         const currentQuery =
-          action.type === '[Products] Set Search Value' ? (action as any).searchValue : '';
+          action.type === ProductsActions.setSearchValue.type ? action.searchValue : '';
 
         return this.apiService.search(currentQuery).pipe(
           tap((products) => {
