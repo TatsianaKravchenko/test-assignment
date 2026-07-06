@@ -85,7 +85,10 @@ export class PolygonModel {
   }
 
   containsPoint(ctx: CanvasRenderingContext2D, rect: Rect, px: number, py: number): boolean {
-    return ctx.isPointInPath(this.path(rect), px, py);
+    const m = ctx.getTransform();
+    const dx = m.a * px + m.c * py + m.e;
+    const dy = m.b * px + m.d * py + m.f;
+    return ctx.isPointInPath(this.path(rect), dx, dy);
   }
 
   isOnRotateHandle(rect: Rect, px: number, py: number): boolean {
