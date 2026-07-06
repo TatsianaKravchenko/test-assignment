@@ -6,6 +6,7 @@ import {
 } from '@app/shared';
 import { HttpService } from '@nestjs/axios';
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   OnApplicationBootstrap,
@@ -20,6 +21,11 @@ import * as path from 'path';
 import { RedisTimeSeriesService } from './redis-time-series.service';
 
 type RawProduct = Record<string, any>;
+
+export interface MulterFile {
+  originalname: string;
+  buffer: Buffer;
+}
 
 const DEFAULT_PUBLIC_API_URL = 'https://dummyjson.com/products?limit=100';
 
@@ -81,6 +87,34 @@ export class AppService implements OnApplicationBootstrap {
       const message = error instanceof Error ? error.message : String(error);
       throw new InternalServerErrorException(
         `Failed to fetch and process API data: ${message}`,
+      );
+    }
+  }
+
+  async uploadAndParse(file?: MulterFile) {
+    if (!file) {
+      throw new BadRequestException(
+        'No file uploaded (expected multipart form field "file")',
+      );
+    }
+
+    try {
+      const fileContent = file.buffer.toString('utf-8');
+      const products = this.parseProductsFile(fileContent);
+      const inserted = await this.upsertProducts(products);
+
+      await this.logIngestion(file.originalname, 'upload', inserted);
+      await this.redisTimeSeriesService.logAction('upload');
+
+      return {
+        message: 'File uploaded, parsed and inserted into MongoDB',
+        file: file.originalname,
+        totalItemsInserted: inserted,
+      };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new InternalServerErrorException(
+        `Failed to process uploaded file: ${message}`,
       );
     }
   }
