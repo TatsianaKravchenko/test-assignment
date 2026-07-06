@@ -8,11 +8,11 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AppService, type MulterFile } from './app.service';
+import { SearchQueryDto } from './dto/search-query.dto';
 import {
   ApiBody,
   ApiConsumes,
   ApiOperation,
-  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 
@@ -53,18 +53,11 @@ export class AppController {
   @ApiOperation({
     summary: 'Search API with efficient pagination over stored products',
   })
-  @ApiQuery({
-    name: 'query',
-    required: false,
-    description: 'Search query for product title or description',
-  })
-  @ApiQuery({ name: 'limit', required: false, example: 10 })
-  @ApiQuery({ name: 'skip', required: false, example: 0 })
-  async search(
-    @Query('query') query?: string,
-    @Query('limit') limit?: number,
-    @Query('skip') skip?: number,
-  ) {
-    return this.appService.searchProducts(query ?? '', limit, skip);
+  async search(@Query() searchQuery: SearchQueryDto) {
+    return this.appService.searchProducts(
+      searchQuery.query ?? '',
+      searchQuery.limit,
+      searchQuery.skip,
+    );
   }
 }
