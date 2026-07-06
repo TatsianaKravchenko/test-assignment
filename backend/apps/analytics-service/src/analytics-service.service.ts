@@ -17,30 +17,19 @@ export class AnalyticsServiceService {
   ) {}
 
   async onModuleInit() {
-    console.log(
-      '[Analytics Service] Initializing Redis Pub/Sub subscription...',
-    );
-
     this.subClient = this.redisClient.duplicate() as RedisClientType;
     await this.subClient.connect();
 
     await this.subClient.subscribe('api-events', async (message) => {
       try {
         const eventData = JSON.parse(message);
-        console.log(
-          `[Analytics Service] Received event from Service A:`,
-          eventData,
-        );
 
         const newLog = this.logRepository.create({
           action: eventData.action,
           eventTimestamp: eventData.timestamp.toString(),
         });
 
-        const savedLog = await this.logRepository.save(newLog);
-        console.log(
-          `[Analytics Service] Log successfully saved to PostgreSQL. ID: ${savedLog.id}`,
-        );
+        await this.logRepository.save(newLog);
       } catch (error) {
         console.error(
           '[Analytics Service] Failed to process or save intercepted event:',
@@ -48,10 +37,6 @@ export class AnalyticsServiceService {
         );
       }
     });
-
-    console.log(
-      '[Analytics Service] Successfully subscribed to channel: "api-events"',
-    );
   }
 
   async getLogs(action?: string, startDate?: string, endDate?: string) {

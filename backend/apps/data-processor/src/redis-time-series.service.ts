@@ -63,8 +63,6 @@ export class RedisTimeSeriesService implements OnModuleInit {
           timestamp,
         }),
       );
-
-      console.log(`[RedisTimeSeries] Logged and published event: ${key}`);
     } catch (error) {
       console.error('Failed to log metric to RedisTimeSeries', error);
     }
