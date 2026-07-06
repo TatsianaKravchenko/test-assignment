@@ -121,7 +121,8 @@ Open **http://localhost:4200/**. The frontend talks to Service A at `http://loca
 
 | Method | Path                               | Description                                                 |
 | ------ | ---------------------------------- | ----------------------------------------------------------- |
-| GET    | `/data/fetch`                      | Fetch from public API → save JSON file → parse it → MongoDB |
+| GET    | `/data/fetch`                      | Fetch from public API → save JSON file → parse it → MongoDB  |
+| POST   | `/data/upload`                     | Upload a JSON file → parse it → insert products into MongoDB |
 | GET    | `/data/search?query=&limit=&skip=` | Search products with pagination                             |
 
 ### Service B — `analytics-service`
@@ -149,6 +150,10 @@ npm install
 npm run start:dev                    # data-processor (Service A, :3000)
 npm run start:dev analytics-service  # Service B (:3001) — in a second terminal
 ```
+
+> Optional: copy `backend/.env.example` to `backend/.env` to override backend config
+> (e.g. `PUBLIC_API_URL`). Without a `.env`, the apps fall back to sensible `localhost`
+> defaults, so this step is not required for a standard local run.
 
 > Note: `/analytics/report` requires the Go `report-service` on `:50051`. Run it via
 > `docker compose up report-service`, or locally with Go installed (`cd report-service`).
