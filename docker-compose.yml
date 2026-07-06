@@ -6,6 +6,12 @@ services:
       - '27017:27017'
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   postgres:
     image: postgres:17
@@ -18,6 +24,12 @@ services:
       - '5432:5432'
     volumes:
       - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U user -d analytics_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   redis:
     image: redis/redis-stack:latest
@@ -27,6 +39,12 @@ services:
       - '8001:8001'
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   data-processor:
     build:
@@ -39,8 +57,22 @@ services:
       - MONGO_HOST=mongodb
       - REDIS_HOST=redis
     depends_on:
-      - mongodb
-      - redis
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:3000/api', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   analytics-service:
     build:
@@ -58,9 +90,24 @@ services:
       - REDIS_HOST=redis
       - REPORT_GRPC_URL=report-service:50051
     depends_on:
-      - postgres
-      - redis
-      - report-service
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      report-service:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:3001/api', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   report-service:
     build:
@@ -74,7 +121,8 @@ services:
       - REDIS_PORT=6379
       - GRPC_PORT=50051
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
 
 volumes:
   mongo_data:
