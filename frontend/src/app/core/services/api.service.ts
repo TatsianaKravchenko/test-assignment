@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, map, Observable, shareReplay, throwError } from 'rxjs';
 import { Product, ProductDto } from '../models/product.model';
+import { environment } from '../../../environments/environment';
 
 interface SearchResponse {
   data: ProductDto[];
@@ -16,7 +17,7 @@ interface SearchResponse {
   providedIn: 'root',
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:3000/data';
+  private baseUrl = environment.apiUrl;
 
   private readonly cache = new Map<string, Observable<Product[]>>();
 

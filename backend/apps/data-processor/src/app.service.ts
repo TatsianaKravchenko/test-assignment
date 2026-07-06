@@ -10,6 +10,7 @@ import {
   InternalServerErrorException,
   OnApplicationBootstrap,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { AnyBulkWriteOperation } from 'mongodb';
 import { Model } from 'mongoose';
@@ -20,7 +21,7 @@ import { RedisTimeSeriesService } from './redis-time-series.service';
 
 type RawProduct = Record<string, any>;
 
-const PUBLIC_API_URL = 'https://dummyjson.com/products?limit=100';
+const DEFAULT_PUBLIC_API_URL = 'https://dummyjson.com/products?limit=100';
 
 @Injectable()
 export class AppService implements OnApplicationBootstrap {
@@ -31,6 +32,7 @@ export class AppService implements OnApplicationBootstrap {
     private productModel: Model<ProductDocument>,
     private readonly httpService: HttpService,
     private readonly redisTimeSeriesService: RedisTimeSeriesService,
+    private readonly configService: ConfigService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -49,9 +51,10 @@ export class AppService implements OnApplicationBootstrap {
 
   async fetchAndSaveFromApi() {
     try {
-      const response = await firstValueFrom(
-        this.httpService.get(PUBLIC_API_URL),
-      );
+      const apiUrl =
+        this.configService.get<string>('PUBLIC_API_URL') ??
+        DEFAULT_PUBLIC_API_URL;
+      const response = await firstValueFrom(this.httpService.get(apiUrl));
 
       const fileName = `api_products_${Date.now()}.json`;
       const filePath = path.join(__dirname, '..', '..', '..', fileName);

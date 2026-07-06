@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AnalyticsServiceController } from './analytics-service.controller';
 import { AnalyticsServiceService } from './analytics-service.service';
 import { RedisModule } from '@app/shared';
@@ -10,6 +11,7 @@ import { REPORT_PACKAGE } from './report/report.interface';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     RedisModule,
     ClientsModule.register([
       {
