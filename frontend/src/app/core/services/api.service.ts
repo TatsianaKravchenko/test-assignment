@@ -13,21 +13,27 @@ interface SearchResponse {
   };
 }
 
+interface CacheEntry {
+  value$: Observable<Product[]>;
+  expiresAt: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
   private baseUrl = environment.apiUrl;
 
-  private readonly cache = new Map<string, Observable<Product[]>>();
+  private static readonly CACHE_TTL_MS = 60_000;
+  private readonly cache = new Map<string, CacheEntry>();
 
   constructor(private http: HttpClient) {}
 
   search(query: string = '', limit: number = 20, skip: number = 0): Observable<Product[]> {
     const key = `${query.trim().toLowerCase()}_${limit}_${skip}`;
     const cached = this.cache.get(key);
-    if (cached) {
-      return cached;
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value$;
     }
 
     const url = `${this.baseUrl}/search?query=${encodeURIComponent(query)}&limit=${limit}&skip=${skip}`;
@@ -40,7 +46,7 @@ export class ApiService {
       }),
     );
 
-    this.cache.set(key, request$);
+    this.cache.set(key, { value$: request$, expiresAt: Date.now() + ApiService.CACHE_TTL_MS });
     return request$;
   }
 

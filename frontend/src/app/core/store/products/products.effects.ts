@@ -16,11 +16,6 @@ export class ProductsEffects {
   loadProducts$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ProductsActions.loadProducts, ProductsActions.setSearchValue),
-      tap((action) => {
-        if (action.type === ProductsActions.setSearchValue.type) {
-          this.apiService.clearCache();
-        }
-      }),
       switchMap((action) => {
         const currentQuery =
           action.type === ProductsActions.setSearchValue.type ? action.searchValue : '';
